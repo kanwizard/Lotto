@@ -10,12 +10,13 @@ def login():
     # 비밀번호 확인 버튼
     if st.button("확인"):
         if password == "860716":  # 원하는 비밀번호로 변경 가능
-            st.success("로그인 성공!")
             st.session_state.logged_in = True  # 로그인 상태 저장
-            return True
+            st.success("로그인 성공!")
+            st.experimental_rerun()  # 로그인 성공 후 페이지 리로드
+            return True  # 로그인 성공
         else:
             st.error("비밀번호가 틀렸습니다.")
-            return False
+            return False  # 로그인 실패
     return False  # 로그인 상태가 아닐 경우 계속 대기
 
 # 동행복권 API를 이용하여 당첨 번호를 가져오는 함수
