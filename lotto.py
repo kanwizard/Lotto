@@ -4,18 +4,22 @@ import random
 
 # 로그인 기능 추가
 def login():
+    # 로그인 상태가 이미 True이면 비밀번호 입력창을 표시하지 않음
+    if 'logged_in' in st.session_state and st.session_state.logged_in:
+        return True  # 이미 로그인한 상태라면 True 반환
+    
     st.title("🔐 로그인")
     password = st.text_input("비밀번호를 입력하세요", type="password")
     
     # 비밀번호 확인 버튼
     if st.button("확인"):
         if password == "860716":  # 원하는 비밀번호로 변경 가능
-            st.success("로그인 성공!")
             st.session_state.logged_in = True  # 로그인 상태 저장
-            return True
+            st.success("로그인 성공!")
+            return True  # 로그인 성공
         else:
             st.error("비밀번호가 틀렸습니다.")
-            return False
+            return False  # 로그인 실패
     return False  # 로그인 상태가 아닐 경우 계속 대기
 
 # 동행복권 API를 이용하여 당첨 번호를 가져오는 함수
@@ -73,9 +77,8 @@ st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="
 # 웹앱 시작
 def main():
     # 로그인 상태 확인
-    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
-        if not login():
-            st.stop()  # 로그인 상태가 아니라면 앱 종료
+    if not login():  # 로그인 상태가 아니면 로그인 페이지로 이동
+        st.stop()  # 로그인 되지 않았으면 실행 중지
     
     st.title("🎰 로또 번호 생성")
 
