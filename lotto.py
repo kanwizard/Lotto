@@ -79,9 +79,12 @@ def main():
     
     st.title("🎰 로또 번호 생성")
 
-    st.markdown("""
-    ## 입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
-    """)
+st.markdown("""
+    <h3 style="font-size: 14px;">로또 번호 생성기</h3>
+    <p style="font-size: 12px;">
+        입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
+    </p>
+""", unsafe_allow_html=True)
         
     # 최신 회차 번호를 입력받기
     latest_draw = st.number_input("🔢 최신 회차 입력", min_value=1, step=1)
