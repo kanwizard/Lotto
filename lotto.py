@@ -78,6 +78,10 @@ def main():
             st.stop()  # 로그인 상태가 아니라면 앱 종료
     
     st.title("🎰 로또 번호 생성")
+
+    st.markdown("""
+    ## 입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
+    """)
         
     # 최신 회차 번호를 입력받기
     latest_draw = st.number_input("🔢 최신 회차 입력", min_value=1, step=1)
