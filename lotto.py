@@ -12,7 +12,6 @@ def login():
         if password == "860716":  # 원하는 비밀번호로 변경 가능
             st.success("로그인 성공!")
             st.session_state.logged_in = True  # 로그인 상태 저장
-            st.session_state.login_success = True  # 로그인 성공 상태 저장
             return True
         else:
             st.error("비밀번호가 틀렸습니다.")
@@ -76,19 +75,12 @@ def main():
     # 로그인 상태 확인
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False  # 초기 로그인 상태 설정
-    if 'login_success' not in st.session_state:
-        st.session_state.login_success = False  # 로그인 성공 여부 초기화
 
     # 로그인 상태가 아니라면 로그인 화면 표시
     if not st.session_state.logged_in:
         if not login():
             st.stop()  # 로그인 상태가 아니라면 앱 종료
     
-    # 로그인 성공 후 로그인 화면 숨기기
-    if st.session_state.login_success:
-        st.session_state.logged_in = True  # 로그인 상태로 변경
-        st.session_state.login_success = False  # 로그인 성공 플래그 초기화
-
     st.title("🎰 로또 번호 생성")
 
     st.markdown("""
