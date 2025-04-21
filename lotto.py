@@ -80,8 +80,8 @@ def main():
     st.title("🎰 로또 번호 생성")
 
     st.markdown("""
-    <h3 style="font-size: 14px;">로또 번호 생성기</h3>
-    <p style="font-size: 12px;">
+    <h3 style="font-size: 20px;">로또 번호 생성기</h3>
+    <p style="font-size: 18px;">
         입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
     </p>
     """, unsafe_allow_html=True)
