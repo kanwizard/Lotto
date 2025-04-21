@@ -69,6 +69,7 @@ def generate_lotto_numbers(frequency, num_combinations=5):
 def main():
     if not login():
     st.stop()
+    
     st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="centered")
     
     st.title("🎰 로또 번호 생성 🎰")
