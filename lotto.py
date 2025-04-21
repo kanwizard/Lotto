@@ -1,6 +1,17 @@
 import streamlit as st
 import requests
 import random
+from bs4 import BeautifulSoup
+
+# 동행복권 최신 회차 가져오기
+def get_latest_draw():
+    url = 'https://www.dhlottery.co.kr/gameResult.do?method=byWin'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # 최신 회차 번호는 웹 페이지에서 특정 클래스로 감싸져 있습니다.
+    latest_draw = soup.find('span', class_='font_num').text.strip()
+    return int(latest_draw)
 
 # 로그인 기능 추가
 def login():
@@ -78,9 +89,13 @@ def main():
             st.stop()  # 로그인 상태가 아니라면 앱 종료
     
     st.title("🎰 로또 번호 생성")
-        
+
+    # 최신 회차 자동으로 가져오기
+    latest_draw = get_latest_draw()
+    st.write(f"📅 최신 회차: {latest_draw}")
+    
     # 최신 회차 번호를 입력받기
-    latest_draw = st.number_input("🔢 최신 회차 입력", min_value=1, step=1)
+    latest_draw_input = st.number_input("🔢 최신 회차 입력", min_value=1, step=1, value=latest_draw)
 
     # 출력할 번호 조합의 개수 입력 받기
     num_combinations = st.number_input("🔢 조합 갯수 입력", min_value=1, step=1, value=5)
