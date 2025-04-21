@@ -11,13 +11,13 @@ def login():
     if st.button("확인"):
         if password == "860716":  # 원하는 비밀번호로 변경 가능
             st.success("로그인 성공!")
+            st.session_state.logged_in = True  # 로그인 상태 저장
             return True
-    elif password:
-        st.error("비밀번호가 틀렸습니다.")
-        return False
-    else:
-        return False
-        
+        else:
+            st.error("비밀번호가 틀렸습니다.")
+            return False
+    return False  # 로그인 상태가 아닐 경우 계속 대기
+
 # 동행복권 API를 이용하여 당첨 번호를 가져오는 함수
 def get_lotto_numbers_by_draw(draw_number):
     url = 'https://www.dhlottery.co.kr/common.do?method=getLottoNumber'
@@ -72,9 +72,11 @@ st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="
 
 # 웹앱 시작
 def main():
-    if not login():
-        st.stop()
-       
+    # 로그인 상태 확인
+    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+        if not login():
+            st.stop()  # 로그인 상태가 아니라면 앱 종료
+    
     st.title("🎰 로또 번호 생성 🎰")
         
     # 최신 회차 번호를 입력받기
