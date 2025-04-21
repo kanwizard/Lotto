@@ -89,7 +89,7 @@ def main():
     if st.session_state.login_success:
         st.session_state.logged_in = True  # 로그인 상태로 변경
         st.session_state.login_success = False  # 로그인 성공 플래그 초기화
-    
+
     st.title("🎰 로또 번호 생성")
 
     st.markdown("""
