@@ -10,8 +10,8 @@ def login():
     # 비밀번호 확인 버튼
     if st.button("확인"):
         if password == "860716":  # 원하는 비밀번호로 변경 가능
-            st.session_state.logged_in = True  # 로그인 상태 저장
             st.success("로그인 성공!")
+            st.session_state.logged_in = True  # 로그인 상태 저장
             return True
         else:
             st.error("비밀번호가 틀렸습니다.")
@@ -73,16 +73,10 @@ st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="
 # 웹앱 시작
 def main():
     # 로그인 상태 확인
-    if 'logged_in' not in st.session_state:
-        st.session_state.logged_in = False  # 초기 로그인 상태 설정
-
-    # 로그인 상태가 아니라면 로그인 화면 표시
-    if not st.session_state.logged_in:
-        # 로그인 화면을 출력
-        if login():
-            return  # 로그인 후, 성공적으로 로그인했다면 바로 종료
-
-    # 로그인 성공 후에 로또 번호 생성 화면을 출력
+    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+        if not login():
+            st.stop()  # 로그인 상태가 아니라면 앱 종료
+    
     st.title("🎰 로또 번호 생성")
 
     st.markdown("""
