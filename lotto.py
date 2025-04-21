@@ -16,7 +16,6 @@ def login():
         if password == "860716":  # 원하는 비밀번호로 변경 가능
             st.session_state.logged_in = True  # 로그인 상태 저장
             st.success("로그인 성공!")
-            st.experimental_rerun()  # 로그인 성공 후 페이지 새로 고침
             return True  # 로그인 성공
         else:
             st.error("비밀번호가 틀렸습니다.")
@@ -80,7 +79,7 @@ def main():
     # 로그인 상태 확인
     if 'logged_in' not in st.session_state or not st.session_state.logged_in:
         if not login():  # 로그인 상태가 아니면 로그인 페이지로 이동
-            st.stop()  # 로그인 되지 않았으면 실행 중지
+            return  # 로그인 되지 않으면 더 이상 진행하지 않음
     
     st.title("🎰 로또 번호 생성")
 
