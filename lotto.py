@@ -6,8 +6,10 @@ import random
 def login():
     st.subheader("🔐 로그인")
     password = st.text_input("비밀번호를 입력하세요", type="password")
+    
+    if st.button("확인"):
     if password == "860716":  # 원하는 비밀번호로 변경 가능
-        st.success("접속 성공!")
+        st.success("로그인 성공!")
         return True
     elif password:
         st.error("비밀번호가 틀렸습니다.")
