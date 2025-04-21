@@ -2,6 +2,19 @@ import streamlit as st
 import requests
 import random
 
+# 로그인 기능 추가
+def login():
+    st.subheader("🔐 로그인")
+    password = st.text_input("비밀번호를 입력하세요", type="password")
+    if password == "1234":  # 원하는 비밀번호로 변경 가능
+        st.success("접속 성공!")
+        return True
+    elif password:
+        st.error("비밀번호가 틀렸습니다.")
+        return False
+    else:
+        return False
+        
 # 동행복권 API를 이용하여 당첨 번호를 가져오는 함수
 def get_lotto_numbers_by_draw(draw_number):
     url = 'https://www.dhlottery.co.kr/common.do?method=getLottoNumber'
@@ -54,6 +67,8 @@ def generate_lotto_numbers(frequency, num_combinations=5):
 
 # 웹앱 시작
 def main():
+    if not login():
+    st.stop()
     st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="centered")
     
     st.title("🎰 로또 번호 생성 🎰")
