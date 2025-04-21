@@ -80,7 +80,7 @@ def main():
     if not st.session_state.logged_in:
         if not login():
             st.stop()  # 로그인 상태가 아니라면 앱 종료
-    
+
     st.title("🎰 로또 번호 생성")
 
     st.markdown("""
