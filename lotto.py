@@ -78,49 +78,51 @@ def main():
 
     # 로그인 상태가 아니라면 로그인 화면 표시
     if not st.session_state.logged_in:
+        # 로그인 화면을 출력
         if not login():
             st.stop()  # 로그인 상태가 아니라면 앱 종료
+    else:
+        # 로그인 성공 후 로또 번호 생성 화면
+        st.title("🎰 로또 번호 생성")
 
-    st.title("🎰 로또 번호 생성")
+        st.markdown("""
+        <h3 style="font-size: 20px;">로또 번호 생성기</h3>
+        <p style="font-size: 18px;">
+            입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
+        </p>
+        """, unsafe_allow_html=True)
+            
+        # 최신 회차 번호를 입력받기
+        latest_draw = st.number_input("🔢 최신 회차 입력", min_value=1, step=1)
 
-    st.markdown("""
-    <h3 style="font-size: 20px;">로또 번호 생성기</h3>
-    <p style="font-size: 18px;">
-        입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
-    </p>
-    """, unsafe_allow_html=True)
+        # 출력할 번호 조합의 개수 입력 받기
+        num_combinations = st.number_input("🔢 조합 갯수 입력", min_value=1, step=1, value=5)
         
-    # 최신 회차 번호를 입력받기
-    latest_draw = st.number_input("🔢 최신 회차 입력", min_value=1, step=1)
+        # 번호 생성 버튼
+        generate_button = st.button("🚀 번호 생성")
+        
+        if generate_button:
+            if latest_draw > 0 and num_combinations > 0:
+                # 최신 회차 번호를 가져옵니다.
+                recent_numbers = get_recent_lotto_numbers(latest_draw)  # 최근 5회차 번호 가져오기
+                
+                # 최근 5회차 당첨 번호 출력
+                st.subheader("📅 최근 5회차 당첨 번호")
+                for i, numbers in enumerate(recent_numbers, 1):
+                    st.markdown(f"**{latest_draw - i + 1}회차:** {', '.join(map(str, numbers))}")
+                
+                # 출현 빈도 계산
+                frequency = calculate_frequency(recent_numbers)
 
-    # 출력할 번호 조합의 개수 입력 받기
-    num_combinations = st.number_input("🔢 조합 갯수 입력", min_value=1, step=1, value=5)
-    
-    # 번호 생성 버튼
-    generate_button = st.button("🚀 번호 생성")
-    
-    if generate_button:
-        if latest_draw > 0 and num_combinations > 0:
-            # 최신 회차 번호를 가져옵니다.
-            recent_numbers = get_recent_lotto_numbers(latest_draw)  # 최근 5회차 번호 가져오기
-            
-            # 최근 5회차 당첨 번호 출력
-            st.subheader("📅 최근 5회차 당첨 번호")
-            for i, numbers in enumerate(recent_numbers, 1):
-                st.markdown(f"**{latest_draw - i + 1}회차:** {', '.join(map(str, numbers))}")
-            
-            # 출현 빈도 계산
-            frequency = calculate_frequency(recent_numbers)
-
-            # 가중치 기반 번호 추첨
-            lotto_combinations = generate_lotto_numbers(frequency, num_combinations)
-            
-            st.subheader(f"🎯 {num_combinations}개의 랜덤 번호 조합:")
-            for idx, combination in enumerate(lotto_combinations, 1):
-                # 번호 조합을 굵은 글씨와 색상으로 출력 (파란색으로 표시)
-                st.markdown(f"<b style='color:#1E90FF'>{idx}번째 조합</b>: <b style='color:#FF0000'>{', '.join(map(str, combination))}</b>", unsafe_allow_html=True)
-        else:
-            st.error("최신 회차 번호와 조합 개수는 1 이상의 정수여야 합니다.")
+                # 가중치 기반 번호 추첨
+                lotto_combinations = generate_lotto_numbers(frequency, num_combinations)
+                
+                st.subheader(f"🎯 {num_combinations}개의 랜덤 번호 조합:")
+                for idx, combination in enumerate(lotto_combinations, 1):
+                    # 번호 조합을 굵은 글씨와 색상으로 출력 (파란색으로 표시)
+                    st.markdown(f"<b style='color:#1E90FF'>{idx}번째 조합</b>: <b style='color:#FF0000'>{', '.join(map(str, combination))}</b>", unsafe_allow_html=True)
+            else:
+                st.error("최신 회차 번호와 조합 개수는 1 이상의 정수여야 합니다.")
 
 if __name__ == "__main__":
     main()
