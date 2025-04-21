@@ -74,9 +74,13 @@ st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="
 # 웹앱 시작
 def main():
     # 로그인 상태 확인
-    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
-        if not login():
-            st.stop()  # 로그인 상태가 아니라면 앱 종료
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False  # 로그인 상태 초기화
+    
+    # 로그인 상태가 아니라면 로그인 페이지로 이동
+    if not st.session_state.logged_in:
+        login()
+        return  # 로그인 화면만 표시하고 이후는 실행되지 않음
     
     st.title("🎰 로또 번호 생성")
 
