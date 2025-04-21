@@ -13,7 +13,6 @@ def login():
             st.success("로그인 성공!")
             st.session_state.logged_in = True  # 로그인 상태 저장
             st.session_state.login_success = True  # 로그인 성공 상태 저장
-            st.experimental_rerun()  # 로그인 후 페이지 리로드
             return True
         else:
             st.error("비밀번호가 틀렸습니다.")
