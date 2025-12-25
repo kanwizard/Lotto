@@ -28,26 +28,44 @@ def get_lotto_numbers_by_draw(draw_number):
     if data.get('returnValue') == 'success':
         return [data[f'drwtNo{i}'] for i in range(1, 7)]
     else:
-        st.error(f"{draw_number}회차 데이터를 가져오지 못했습니다.")
+        st.error(f"Error retrieving data for draw number {draw_number}")
         return []
 
-# 최근 4회차 로또 번호 가져오기
+# 최근 5회차 로또 번호 가져오기
 def get_recent_lotto_numbers(latest_draw):
-    return [get_lotto_numbers_by_draw(latest_draw - i) for i in range(4)]
+    return [get_lotto_numbers_by_draw(latest_draw - i) for i in range(5)]
 
-# 로또 번호 생성 (1~39번 중에서 최근 당첨 번호 제외)
-def generate_lotto_combinations(num_combinations, recent_numbers_flat):
-    available_numbers = [num for num in range(1, 40) if num not in recent_numbers_flat]
+# 번호 출현 빈도 계산
+def calculate_frequency(recent_numbers):
+    frequency = {i: 0 for i in range(1, 46)}  # 1부터 45까지 번호의 출현 빈도
+    for numbers in recent_numbers:
+        for number in numbers:
+            frequency[number] += 1
+    return frequency
+
+# 번호 추첨: 확률 기반으로 랜덤 번호 생성
+def generate_lotto_numbers(frequency, num_combinations=5):
+    # 번호와 해당 번호의 가중치 계산
+    weighted_numbers = []
+    for number, freq in frequency.items():
+        # 출현한 번호일수록 가중치가 낮고, 출현하지 않은 번호는 가중치가 높아짐
+        weight = 1 / (freq + 1)  # 출현 횟수가 많을수록 가중치가 낮아짐
+        weighted_numbers.append((number, weight))  # 번호와 가중치를 튜플로 저장
     
-    if len(available_numbers) < 6:
-        st.error("선택 가능한 번호가 부족합니다. 조건을 다시 확인해주세요.")
-        return []
+    # 번호들을 가중치 기반으로 확률적으로 고르기 위한 리스트로 변환
+    population = []
+    for number, weight in weighted_numbers:
+        # 가중치에 따라 번호를 추가 (가중치가 낮은 번호는 적게 추가)
+        population.extend([number] * int(weight * 100))  # 가중치를 기반으로 확장
 
+    # 중복 없이 지정된 개수만큼 번호 추첨
     combinations = []
     while len(combinations) < num_combinations:
-        combination = sorted(random.sample(available_numbers, 6))
-        if combination not in combinations:
-            combinations.append(combination)
+        selected_numbers = set()
+        while len(selected_numbers) < 6:  # 하나의 조합에서 6개의 번호를 추첨
+            selected_numbers.add(random.choice(population))  # 가중치 기반 번호 추출
+        combinations.append(sorted(list(selected_numbers)))  # 번호는 오름차순으로 정렬하여 추가
+    
     return combinations
 
 st.set_page_config(page_title="로또 번호 생성", page_icon="🎰", layout="centered")
@@ -64,7 +82,7 @@ def main():
     st.markdown("""
     <h3 style="font-size: 20px;">로또 번호 생성기</h3>
     <p style="font-size: 18px;">
-        입력한 회차부터 이전 4회차 까지의 당첨 번호를 분석하여 생성함
+        입력한 회차부터 이전 5회차 까지의 당첨 번호를 분석하여 생성함
     </p>
     """, unsafe_allow_html=True)
         
@@ -80,19 +98,19 @@ def main():
     if generate_button:
         if latest_draw > 0 and num_combinations > 0:
             # 최신 회차 번호를 가져옵니다.
-            recent_numbers = get_recent_lotto_numbers(latest_draw)  # 최근 4회차 번호 가져오기
+            recent_numbers = get_recent_lotto_numbers(latest_draw)  # 최근 5회차 번호 가져오기
             
-            # 최근 4회차 당첨 번호 출력
-            st.subheader("📅 최근 4회차 당첨 번호")
+            # 최근 5회차 당첨 번호 출력
+            st.subheader("📅 최근 5회차 당첨 번호")
             for i, numbers in enumerate(recent_numbers, 1):
                 st.markdown(f"**{latest_draw - i + 1}회차:** {', '.join(map(str, numbers))}")
-                        
-	# 모든 최근 번호를 하나의 리스트로 평탄화
-            recent_numbers_flat = [num for sublist in recent_numbers for num in sublist]
+            
+            # 출현 빈도 계산
+            frequency = calculate_frequency(recent_numbers)
 
-            # 조합 생성
-            lotto_combinations = generate_lotto_combinations(num_combinations, recent_numbers_flat)
-
+            # 가중치 기반 번호 추첨
+            lotto_combinations = generate_lotto_numbers(frequency, num_combinations)
+            
             st.subheader(f"🎯 {num_combinations}개의 랜덤 번호 조합:")
             for idx, combination in enumerate(lotto_combinations, 1):
                 # 번호 조합을 굵은 글씨와 색상으로 출력 (파란색으로 표시)
