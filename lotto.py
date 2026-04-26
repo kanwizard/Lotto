@@ -11,14 +11,25 @@ def get_lotto(draw_no):
     url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
     params = {"drwNo": draw_no}
 
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=5)
+        res = requests.get(url, params=params, headers=headers, timeout=5)
+
+        # 🔥 먼저 텍스트 확인 (중요)
+        text = res.text
+
+        if "drwtNo1" not in text:
+            return []
+
         data = res.json()
 
         if data.get("returnValue") != "success":
             return []
 
-        return [data[f"drwtNo{i}"] for i in range(1, 7)]
+        return [data.get(f"drwtNo{i}") for i in range(1, 7)]
 
     except:
         return []
