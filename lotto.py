@@ -7,7 +7,6 @@ st.set_page_config(page_title="로또 생성기", page_icon="🎰")
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-# 🔹 로또 API
 def get_lotto(draw_no):
     url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
     params = {"drwNo": draw_no}
@@ -25,19 +24,10 @@ def get_lotto(draw_no):
         return []
 
 
-# 🔹 최근 3회차 가져오기
 def get_recent_3(latest):
-    results = []
-
-    for i in range(3):
-        nums = get_lotto(latest - i)
-        if nums:
-            results.append(nums)
-
-    return results
+    return [get_lotto(latest - i) for i in range(3)]
 
 
-# 🔹 랜덤 생성 (1~39)
 def generate(count):
     return [
         sorted(random.sample(range(1, 40), 6))
@@ -47,32 +37,26 @@ def generate(count):
 
 # ================= UI =================
 
-st.title("🎰 로또 랜덤 생성기 + 최근 3회차 참고")
+st.title("🎰 로또 생성기")
 
-latest = st.number_input("최신 회차 입력", min_value=1, value=1100)
-
+latest = st.number_input("최신 회차", min_value=1, value=1100)
 count = st.number_input("생성 개수", min_value=1, value=5)
 
-# 🔥 세션 저장
-if st.button("📥 최근 3회차 불러오기"):
-    st.session_state.recent = get_recent_3(latest)
+# 🔥 버튼 1개로 통합 (중요)
+if st.button("📊 최근 3회차 + 생성 실행"):
 
-recent = st.session_state.get("recent", [])
+    recent = get_recent_3(latest)
 
-# 📊 최근 3회차 출력
-if recent:
-    st.subheader("📅 최근 3회차 (참고용)")
+    st.subheader("📅 최근 3회차")
 
     for i, r in enumerate(recent):
         st.write(f"{latest - i}회차: {r}")
 
-st.divider()
+    st.divider()
 
-# 🎯 랜덤 생성
-if st.button("🎯 번호 생성"):
     results = generate(count)
 
-    st.subheader("🎲 랜덤 추천")
+    st.subheader("🎯 랜덤 결과")
 
     for i, r in enumerate(results, 1):
         st.write(f"{i}번: {r}")
