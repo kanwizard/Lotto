@@ -1,60 +1,84 @@
 import requests
+from bs4 import BeautifulSoup
 import random
+import re
+import time
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
 }
 
-# 안전한 요청 함수
-def safe_request(url, params):
+BASE_URL = "https://dhlottery.co.kr/gameResult.do?method=byWin"
+
+
+# 최신 회차 가져오기
+def get_latest_draw():
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=3)
+        res = requests.get(BASE_URL, headers=HEADERS, timeout=5)
 
         if res.status_code != 200:
-            return None
+            return 0
 
-        # JSON 파싱 안전 처리
-        try:
-            return res.json()
-        except:
-            return None
+        soup = BeautifulSoup(res.text, "html.parser")
 
-    except requests.exceptions.Timeout:
-        print("⏱️ 요청 시간 초과")
-        return None
-    except requests.exceptions.RequestException:
-        print("❌ 요청 실패")
-        return None
+        title = soup.select_one("h4 strong")
+        if not title:
+            return 0
+
+        match = re.search(r"\d+", title.text)
+        return int(match.group()) if match else 0
+
+    except:
+        return 0
 
 
-# 로또 번호 가져오기
-def get_lotto_numbers(draw_no):
-    url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
-    params = {"drwNo": draw_no}
+# 특정 회차 번호 크롤링
+def get_draw_numbers(draw_no):
+    try:
+        url = f"{BASE_URL}&drwNo={draw_no}"
+        res = requests.get(url, headers=HEADERS, timeout=5)
 
-    data = safe_request(url, params)
+        if res.status_code != 200:
+            return []
 
-    if not data:
-        print(f"{draw_no}회차 데이터 없음")
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        numbers = []
+        for i in range(1, 7):
+            tag = soup.select_one(f"#drwtNo{i}")
+            if not tag:
+                return []
+            numbers.append(int(tag.text))
+
+        return numbers
+
+    except:
         return []
 
-    if "drwtNo1" in data:
-        return [data[f"drwtNo{i}"] for i in range(1, 7)]
 
-    return []
+# 최근 3회차 가져오기
+def get_recent_3():
+    latest = get_latest_draw()
 
+    if latest == 0:
+        print("❌ 최신 회차 가져오기 실패")
+        return []
 
-# 최근 3회차
-def get_recent_3(draw_no):
+    print(f"📌 최신 회차: {latest}")
+
     results = []
 
     for i in range(3):
-        nums = get_lotto_numbers(draw_no - i)
+        draw_no = latest - i
+        nums = get_draw_numbers(draw_no)
 
         if nums:
+            print(f"{draw_no}회: {nums}")
             results.append(nums)
         else:
-            print(f"{draw_no - i}회차 스킵")
+            print(f"{draw_no}회 크롤링 실패")
+
+        time.sleep(0.5)  # 서버 부담 방지
 
     return results
 
@@ -62,27 +86,26 @@ def get_recent_3(draw_no):
 # 번호 생성
 def generate_numbers(recent_draws):
     all_numbers = set(range(1, 40))
-    used = set(n for draw in recent_draws for n in draw)
-    available = sorted(list(all_numbers - used))
+    used_numbers = set(n for draw in recent_draws for n in draw)
 
-    print("\n최근 3회차:", recent_draws)
-    print("가능 번호:", available)
+    available = sorted(list(all_numbers - used_numbers))
+
+    print("\n🚫 최근 3회차 사용된 번호:", sorted(used_numbers))
+    print("✅ 사용 가능한 번호:", available)
 
     if len(available) < 6:
-        print("❌ 숫자 부족")
+        print("❌ 가능한 숫자 부족")
         return
 
     result = sorted(random.sample(available, 6))
-    print("🎯 추천:", result)
+    print("🎯 추천 번호:", result)
 
 
 # 실행
 if __name__ == "__main__":
-    latest = int(input("최신 회차 입력: "))
-
-    recent = get_recent_3(latest)
+    recent = get_recent_3()
 
     if not recent:
-        print("❌ 데이터를 가져오지 못했습니다. (네트워크 or 차단 문제)")
+        print("❌ 데이터 수집 실패 (네트워크 or 차단)")
     else:
         generate_numbers(recent)
