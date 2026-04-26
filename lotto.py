@@ -23,20 +23,28 @@ def get_lotto_numbers_by_draw(draw_number):
     url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
     params = {"drwNo": draw_number}
 
-    try:
-        response = requests.get(url, params=params, timeout=5)
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=5)
+
+        # 상태 체크
         if response.status_code != 200:
             return []
 
-        # JSON 파싱 안전 처리
+        # 🔥 JSON 먼저 시도
         try:
             data = response.json()
         except:
             return []
 
-        # 정상 데이터 확인
-        if not data or data.get("returnValue") != "success":
+        # 정상 응답 체크
+        if not isinstance(data, dict):
+            return []
+
+        if data.get("returnValue") != "success":
             return []
 
         return [data.get(f"drwtNo{i}") for i in range(1, 7)]
