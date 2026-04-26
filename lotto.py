@@ -6,17 +6,41 @@ st.set_page_config(page_title="로또 추천기", page_icon="🎰")
 st.title("🎰 패턴 + 최근 3회차 제외 로또 생성기")
 
 
-# =========================
-# 🔥 최근 3회차 더미 데이터 (예시)
-# 👉 실제 API 붙이면 여기만 교체하면 됨
-# =========================
+import requests
+
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+
+# 🔥 회차 1개 조회
+def get_lotto(draw_no):
+    url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
+    params = {"drwNo": draw_no}
+
+    try:
+        res = requests.get(url, params=params, headers=HEADERS, timeout=5)
+        data = res.json()
+
+        if data.get("returnValue") != "success":
+            return []
+
+        return [data.get(f"drwtNo{i}") for i in range(1, 7)]
+
+    except:
+        return []
+
+
+# 🔥 최근 3회차 자동 가져오기 (여기가 핵심)
 def get_recent_3(latest):
-    # 실제 환경에서는 API로 교체 가능
-    return [
-        [1, 3, 5, 7, 9, 11],
-        [2, 4, 6, 8, 10, 12],
-        [13, 14, 15, 16, 17, 18]
-    ]
+    results = []
+
+    for i in range(3):
+        nums = get_lotto(latest - i)
+
+        # 정상 데이터만 추가
+        if nums and len(nums) == 6:
+            results.append(nums)
+
+    return results
 
 
 # =========================
