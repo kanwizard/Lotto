@@ -1,28 +1,18 @@
 import streamlit as st
 import requests
-import random
 
-st.set_page_config(page_title="로또 생성기", page_icon="🎰")
+st.set_page_config(page_title="로또 최근 3회차", page_icon="🎰")
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
+# 🔥 로또 API 함수 (안정 버전)
 def get_lotto(draw_no):
     url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
     params = {"drwNo": draw_no}
 
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
-
     try:
-        res = requests.get(url, params=params, headers=headers, timeout=5)
-
-        # 🔥 먼저 텍스트 확인 (중요)
-        text = res.text
-
-        if "drwtNo1" not in text:
-            return []
+        res = requests.get(url, params=params, headers=HEADERS, timeout=5)
 
         data = res.json()
 
@@ -35,39 +25,33 @@ def get_lotto(draw_no):
         return []
 
 
+# 🔥 최근 3회차 가져오기
 def get_recent_3(latest):
-    return [get_lotto(latest - i) for i in range(3)]
+    results = []
 
+    for i in range(3):
+        nums = get_lotto(latest - i)
 
-def generate(count):
-    return [
-        sorted(random.sample(range(1, 40), 6))
-        for _ in range(count)
-    ]
+        if nums:
+            results.append(nums)
+
+    return results
 
 
 # ================= UI =================
 
-st.title("🎰 로또 생성기")
+st.title("🎰 최근 3회차 로또 조회기")
 
-latest = st.number_input("최신 회차", min_value=1, value=1100)
-count = st.number_input("생성 개수", min_value=1, value=5)
+latest = st.number_input("최신 회차 입력", min_value=1, value=1100)
 
-# 🔥 버튼 1개로 통합 (중요)
-if st.button("📊 최근 3회차 + 생성 실행"):
+if st.button("📥 최근 3회차 가져오기"):
 
     recent = get_recent_3(latest)
 
-    st.subheader("📅 최근 3회차")
+    if not recent:
+        st.error("❌ 데이터를 가져오지 못했습니다")
+    else:
+        st.success("데이터 로딩 성공!")
 
-    for i, r in enumerate(recent):
-        st.write(f"{latest - i}회차: {r}")
-
-    st.divider()
-
-    results = generate(count)
-
-    st.subheader("🎯 랜덤 결과")
-
-    for i, r in enumerate(results, 1):
-        st.write(f"{i}번: {r}")
+        for i, r in enumerate(recent):
+            st.write(f"📌 {latest - i}회차: {r}")
