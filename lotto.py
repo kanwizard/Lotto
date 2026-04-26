@@ -8,6 +8,8 @@ st.title("🎰 로또 생성기 (연속번호 제한)")
 # 조합 개수 입력
 count = st.number_input("조합 개수", min_value=1, value=5, step=1)
 
+# 🔥 제외할 번호
+EXCLUDED_NUMBERS = {10, 20, 30}
 
 # 🔥 연속번호 체크 함수
 def has_consecutive(nums):
