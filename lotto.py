@@ -24,8 +24,10 @@ def has_consecutive(nums):
 
 # 🔥 번호 생성 함수
 def generate_numbers():
+    pool = [n for n in range(1, 40) if n not in EXCLUDED_NUMBERS]
+
     while True:
-        nums = random.sample(range(1, 40), 6)
+        nums = random.sample(pool, 6)
 
         if not has_consecutive(nums):
             return sorted(nums)
