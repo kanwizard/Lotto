@@ -14,16 +14,41 @@ def get_lotto(draw_no):
     url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber"
     params = {"drwNo": draw_no}
 
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=5)
-        data = res.json()
+        res = requests.get(url, params=params, headers=headers, timeout=5)
+
+        # 🔥 상태 체크
+        if res.status_code != 200:
+            return []
+
+        # 🔥 JSON 안전 파싱
+        try:
+            data = res.json()
+        except:
+            return []
+
+        # 🔥 구조 검증
+        if not isinstance(data, dict):
+            return []
 
         if data.get("returnValue") != "success":
             return []
 
-        return [data.get(f"drwtNo{i}") for i in range(1, 7)]
+        # 🔥 숫자 추출 안전 처리
+        numbers = []
+        for i in range(1, 7):
+            value = data.get(f"drwtNo{i}")
+            if value is None:
+                return []
+            numbers.append(value)
 
-    except:
+        return numbers
+
+    except Exception:
         return []
 
 
